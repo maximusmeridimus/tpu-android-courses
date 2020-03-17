@@ -19,17 +19,24 @@ public class Student implements Parcelable {
 	public String secondName;
 	@NonNull
 	public String lastName;
+	@NonNull
+	public String groupName;
 
-	public Student(@NonNull String firstName, @NonNull String secondName, @NonNull String lastName) {
+	public int currentPosition;
+
+	public Student(@NonNull String firstName, @NonNull String secondName, @NonNull String lastName, @NonNull String groupName) {
 		this.lastName = lastName;
 		this.firstName = firstName;
 		this.secondName = secondName;
+		this.groupName = groupName;
 	}
 
 	protected Student(Parcel in) {
 		firstName = in.readString();
 		lastName = in.readString();
 		secondName = in.readString();
+		groupName = in.readString();
+		currentPosition = in.readInt();
 	}
 
 	public static final Creator<Student> CREATOR = new Creator<Student>() {
@@ -54,6 +61,8 @@ public class Student implements Parcelable {
 		dest.writeString(firstName);
 		dest.writeString(lastName);
 		dest.writeString(secondName);
+		dest.writeString(groupName);
+		dest.writeInt(currentPosition);
 	}
 
 	@Override
@@ -63,11 +72,18 @@ public class Student implements Parcelable {
 		Student student = (Student) o;
 		return lastName.equals(student.lastName) &&
 				firstName.equals(student.firstName) &&
-				secondName.equals(student.secondName);
+				secondName.equals(student.secondName) &&
+				groupName.equals(student.groupName);
 	}
 
 	@Override
 	public int hashCode() {
-		return ObjectsCompat.hash(lastName, firstName, secondName);
+		return ObjectsCompat.hash(lastName, firstName, secondName, groupName);
+	}
+
+	@NonNull
+	@Override
+	public String toString() {
+		return currentPosition + ". " + firstName + " " + lastName + " " + secondName;
 	}
 }

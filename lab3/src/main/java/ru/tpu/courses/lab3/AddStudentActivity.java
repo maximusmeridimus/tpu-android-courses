@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,10 +30,12 @@ public class AddStudentActivity extends AppCompatActivity {
     }
 
     private final StudentsCache studentsCache = StudentsCache.getInstance();
+    private final GroupsCache groupsCache = GroupsCache.getInstance();
 
     private EditText firstName;
     private EditText secondName;
     private EditText lastName;
+    private Spinner groupSelector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +54,26 @@ public class AddStudentActivity extends AppCompatActivity {
         firstName = findViewById(R.id.first_name);
         secondName = findViewById(R.id.second_name);
         lastName = findViewById(R.id.last_name);
+
+        groupSelector = findViewById(R.id.group_selector);
+        ArrayAdapter<Group> groupAdapter = new ArrayAdapter<>
+                (this, android.R.layout.simple_spinner_item, groupsCache.getGroups());
+        groupSelector.setAdapter(groupAdapter);
+
+        Intent receivedIntent = getIntent();
+        Student receivedStudent = receivedIntent.getParcelableExtra("student_details");
+        if(receivedStudent == null) {
+            return;
+        }
+
+        firstName.setText(receivedStudent.firstName);
+        lastName.setText(receivedStudent.lastName);
+        secondName.setText(receivedStudent.secondName);
+
+        if (receivedStudent.groupName != null) {
+            int spinnerPosition = groupsCache.getGroups().indexOf(new Group(receivedStudent.groupName));
+            groupSelector.setSelection(spinnerPosition);
+        }
     }
 
     /**
@@ -75,16 +99,20 @@ public class AddStudentActivity extends AppCompatActivity {
         // Если пользователь нажал "Сохранить"
         if (item.getItemId() == R.id.action_save) {
             // Создаём объект студента из введенных
+            Group group = (Group) groupSelector.getSelectedItem();
+
             Student student = new Student(
                     firstName.getText().toString(),
                     secondName.getText().toString(),
-                    lastName.getText().toString()
+                    lastName.getText().toString(),
+                    group.Title
             );
 
             // Проверяем, что все поля были указаны
             if (TextUtils.isEmpty(student.firstName) ||
                     TextUtils.isEmpty(student.secondName) ||
-                    TextUtils.isEmpty(student.lastName)) {
+                    TextUtils.isEmpty(student.lastName) ||
+                    TextUtils.isEmpty(student.groupName)) {
                 // Класс Toast позволяет показать системное уведомление поверх всего UI
                 Toast.makeText(this, R.string.lab3_error_empty_fields, Toast.LENGTH_LONG).show();
                 return true;

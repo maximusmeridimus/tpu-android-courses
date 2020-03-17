@@ -42,4 +42,17 @@
 			/>
 	</com.google.android.material.textfield.TextInputLayout>
 
+	<TextView
+		android:text="@string/lab3_group"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+	</TextView>
+
+	<Spinner
+		android:id="@+id/group_selector"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+	</Spinner>
+
 </LinearLayout>

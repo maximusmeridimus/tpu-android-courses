@@ -7,5 +7,6 @@
     <string name="lab3_action_save">Сохранить</string>
 
     <string name="lab3_error_already_exists">Такой студент уже существует</string>
+    <string name="lab3_error_group_already_exists">Такая группа уже существует</string>
     <string name="lab3_error_empty_fields">Все поля должны быть заполнены</string>
 </resources>

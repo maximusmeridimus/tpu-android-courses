@@ -2,11 +2,28 @@ package ru.tpu.courses.lab2;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.Px;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 /**
  * <b>Вёрстка UI. Сохранение состояния.</b>
@@ -32,6 +49,18 @@ import androidx.appcompat.app.AppCompatActivity;
  */
 public class Lab2Activity extends AppCompatActivity {
 
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        lab2ViewsContainer.saveState(getSharedPreferences("shared preferences", MODE_PRIVATE));
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        lab2ViewsContainer.loadState(getSharedPreferences("shared preferences", MODE_PRIVATE));
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
     public static Intent newIntent(@NonNull Context context) {
         return new Intent(context, Lab2Activity.class);
     }
@@ -47,17 +76,32 @@ public class Lab2Activity extends AppCompatActivity {
 
         setTitle(getString(R.string.lab2_title, getClass().getSimpleName()));
 
-        // findViewById - generic метод https://docs.oracle.com/javase/tutorial/extra/generics/methods.html,
-        // который автоматически кастит (class cast) View в указанный класс.
-        // Тип вью, в которую происходит каст, не проверяется, поэтому если здесь указать View,
-        // отличную от View в XML, то приложение крашнется на вызове этого метода.
         lab2ViewsContainer = findViewById(R.id.container);
-        findViewById(R.id.btn_add_view).setOnClickListener(view -> lab2ViewsContainer.incrementViews());
+
+        findViewById(R.id.btn_add_view).setOnClickListener(view ->
+                lab2ViewsContainer.incrementViews(
+                        ((EditText)findViewById(R.id.textOption)).getText(),
+                        ((EditText)findViewById(R.id.textScore)).getText()));
+
+        findViewById(R.id.btn_save).setOnClickListener(view ->
+                lab2ViewsContainer.saveState(getSharedPreferences("shared preferences", MODE_PRIVATE)));
+
+        findViewById(R.id.btn_load).setOnClickListener(view ->
+                lab2ViewsContainer.loadState(getSharedPreferences("shared preferences", MODE_PRIVATE)));
 
         // Восстанавливаем состояние нашего View, добавляя заново все View
         if (savedInstanceState != null) {
             lab2ViewsContainer.setViewsCount(savedInstanceState.getInt(STATE_VIEWS_COUNT));
         }
+    }
+
+    @Px
+    public int dpToPx(float dp) {
+        if (dp == 0) {
+            return 0;
+        }
+        float density = getResources().getDisplayMetrics().density;
+        return (int) Math.ceil(density * dp);
     }
 
     @Override

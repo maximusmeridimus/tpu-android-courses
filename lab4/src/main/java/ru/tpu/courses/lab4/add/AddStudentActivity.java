@@ -70,7 +70,7 @@ public class AddStudentActivity extends AppCompatActivity {
         bitmapProcessor = new BitmapProcessor(this);
         studentDao = Lab4Database.getInstance(this).studentDao();
 
-        //noinspection ConstantConditions
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         firstName = findViewById(R.id.first_name);

@@ -4,4 +4,5 @@ android.resourcePrefix 'lab2_'
 
 dependencies {
 	implementation "androidx.appcompat:appcompat:$appcompat"
+	implementation "com.google.code.gson:gson:2.8.5"
 }

@@ -3,15 +3,27 @@ package ru.tpu.courses.lab3;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import ru.tpu.courses.lab3.adapter.StudentsAdapter;
+import ru.tpu.courses.lab3.adapter.StudentsNormAdapter;
 
 /**
  * <b>RecyclerView, взаимодействие между экранами. Memory Cache.</b>
@@ -41,9 +53,13 @@ public class Lab3Activity extends AppCompatActivity {
     }
 
     private final StudentsCache studentsCache = StudentsCache.getInstance();
+    private final GroupsCache groupsCache = GroupsCache.getInstance();
+
+    private List<ListItem> consolidatedList = new ArrayList<>();
 
     private RecyclerView list;
     private FloatingActionButton fab;
+    private FloatingActionButton fabGroup;
 
     private StudentsAdapter studentsAdapter;
 
@@ -56,6 +72,7 @@ public class Lab3Activity extends AppCompatActivity {
         setContentView(R.layout.lab3_activity);
         list = findViewById(android.R.id.list);
         fab = findViewById(R.id.fab);
+        fabGroup = findViewById(R.id.fab_group);
 
         /*
         Здесь идёт инициализация RecyclerView. Первое, что необходимо для его работы, это установить
@@ -74,8 +91,44 @@ public class Lab3Activity extends AppCompatActivity {
         необходимая для заполнения RecyclerView. В примере мы выводим пронумерованный список
         студентов, подробнее о работе адаптера в документации к классу StudentsAdapter.
          */
-        list.setAdapter(studentsAdapter = new StudentsAdapter());
-        studentsAdapter.setStudents(studentsCache.getStudents());
+
+        HashMap<String, List<Student>> groupedHashMap = groupDataIntoHashMap(studentsCache.getStudents());
+
+        for (String group : groupedHashMap.keySet()) {
+            GroupItem groupItem = new GroupItem();
+            groupItem.setGroupTitle(group);
+            consolidatedList.add(groupItem);
+
+            int studentNumber = 1;
+
+            for (Student student : groupedHashMap.get(group)) {
+                StudentItem studentItem = new StudentItem();
+                student.currentPosition = studentNumber++;
+                studentItem.setStudent(student);
+                consolidatedList.add(studentItem);
+            }
+        }
+
+        studentsAdapter = new StudentsAdapter(this, consolidatedList);
+        list.setAdapter(studentsAdapter);
+        studentsAdapter.setOnItemClickListener(position -> {
+            Intent intent = new Intent(Lab3Activity.this, AddStudentActivity.class);
+            intent.putExtra("student_details", ((StudentItem)consolidatedList.get(position)).getStudent());
+
+            startActivity(intent);
+        });
+
+
+//        list.setAdapter(studentsAdapter = new StudentsAdapter(studentsCache.getStudents()));
+//        studentsAdapter.setOnItemClickListener(new StudentsNormAdapter.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(int position) {
+//                Intent intent = new Intent(Lab3Activity.this, AddStudentActivity.class);
+//                intent.putExtra("student", studentsCache.getStudents().get(position));
+//
+//                startActivity(intent);
+//            }
+//        });
 
         /*
         При нажатии на кнопку мы переходим на Activity для добавления студента. Обратите внимание,
@@ -90,6 +143,67 @@ public class Lab3Activity extends AppCompatActivity {
                         REQUEST_STUDENT_ADD
                 )
         );
+
+        fabGroup.setOnClickListener(v -> createGroup());
+    }
+
+    private HashMap<String, List<Student>> groupDataIntoHashMap(List<Student> studentList) {
+
+        HashMap<String, List<Student>> groupedHashMap = new HashMap<>();
+
+        for (Student student : studentList) {
+
+            String hashMapKey = student.groupName;
+
+            if (groupedHashMap.containsKey(hashMapKey)) {
+                // The key is already in the HashMap; add the pojo object
+                // against the existing key.
+                groupedHashMap.get(hashMapKey).add(student);
+            } else {
+                // The key is not there in the HashMap; create a new key-value pair
+                List<Student> list = new ArrayList<>();
+                list.add(student);
+                groupedHashMap.put(hashMapKey, list);
+            }
+        }
+
+        return groupedHashMap;
+    }
+
+    public void createGroup(){
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.lab3_activity_add_group, null);
+        final EditText groupTitle = dialogView.findViewById(R.id.new_group_edit_text);
+        Button newGroupBtn = dialogView.findViewById(R.id.new_group_btn);
+
+        dialogBuilder.setView(dialogView);
+        AlertDialog dialog = dialogBuilder.create();
+
+        newGroupBtn.setOnClickListener(v -> {
+            Group group = new Group(groupTitle.getText().toString());
+            if(TextUtils.isEmpty(group.Title)) {
+                Toast.makeText(this, R.string.lab3_error_empty_fields, Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            if (groupsCache.contains(group)) {
+                Toast.makeText(this, R.string.lab3_error_group_already_exists, Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            groupsCache.addGroup(group);
+
+            GroupItem groupItem = new GroupItem();
+            groupItem.setGroupTitle(group.Title);
+            consolidatedList.add(groupItem);
+            studentsAdapter.setStudentConsolidatedList(consolidatedList);
+
+            studentsAdapter.notifyItemInserted(studentsAdapter.getItemCount());
+
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 
     /**
@@ -110,11 +224,33 @@ public class Lab3Activity extends AppCompatActivity {
         if (requestCode == REQUEST_STUDENT_ADD && resultCode == RESULT_OK) {
             Student student = AddStudentActivity.getResultStudent(data);
 
+            int count = 0;
+            for (Student x : studentsCache.getStudents()) {
+                if (x.groupName.equals(student.groupName)) {
+                    count++;
+                }
+            }
+            int studentsInGroup = count;
+            int groupItemPosition = studentsAdapter.getGroupItemPosition(student.groupName);
+
+            student.currentPosition = studentsInGroup + 1;
+
             studentsCache.addStudent(student);
 
-            studentsAdapter.setStudents(studentsCache.getStudents());
-            studentsAdapter.notifyItemRangeInserted(studentsAdapter.getItemCount() - 2, 2);
-            list.scrollToPosition(studentsAdapter.getItemCount() - 1);
+            StudentItem studentItem = new StudentItem();
+            studentItem.setStudent(student);
+
+            if(consolidatedList.size() == groupItemPosition + studentsInGroup + 1) {
+                consolidatedList.add(studentItem);
+            } else {
+                consolidatedList.add(groupItemPosition + studentsInGroup + 1, studentItem);
+            }
+            studentsAdapter.setStudentConsolidatedList(consolidatedList);
+
+            Log.i("POSITION", "position:" + (groupItemPosition + studentsInGroup));
+            studentsAdapter.notifyItemInserted(groupItemPosition + studentsInGroup + 1);
+            //studentsAdapter.notifyItemRangeInserted(studentsAdapter.getItemCount() - 2, 1);
+            list.scrollToPosition(groupItemPosition + studentsInGroup);
         }
     }
 }
