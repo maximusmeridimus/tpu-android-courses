@@ -84,6 +84,6 @@ public class Student implements Parcelable {
 	@NonNull
 	@Override
 	public String toString() {
-		return currentPosition + ". " + firstName + " " + lastName + " " + secondName;
+		return currentPosition + ". " + firstName + " " + secondName + " " + lastName;
 	}
 }
