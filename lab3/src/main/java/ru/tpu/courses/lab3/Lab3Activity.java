@@ -60,6 +60,7 @@ public class Lab3Activity extends AppCompatActivity {
     private RecyclerView list;
     private FloatingActionButton fab;
     private FloatingActionButton fabGroup;
+    private AlertDialog dialog;
 
     private StudentsAdapter studentsAdapter;
 
@@ -118,18 +119,6 @@ public class Lab3Activity extends AppCompatActivity {
             startActivity(intent);
         });
 
-
-//        list.setAdapter(studentsAdapter = new StudentsAdapter(studentsCache.getStudents()));
-//        studentsAdapter.setOnItemClickListener(new StudentsNormAdapter.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(int position) {
-//                Intent intent = new Intent(Lab3Activity.this, AddStudentActivity.class);
-//                intent.putExtra("student", studentsCache.getStudents().get(position));
-//
-//                startActivity(intent);
-//            }
-//        });
-
         /*
         При нажатии на кнопку мы переходим на Activity для добавления студента. Обратите внимание,
         что здесь используется метод startActivityForResult. Этот метод позволяет организовывать
@@ -145,6 +134,14 @@ public class Lab3Activity extends AppCompatActivity {
         );
 
         fabGroup.setOnClickListener(v -> createGroup());
+    }
+
+    @Override
+    protected void onDestroy() {
+        if(dialog != null) {
+            dialog.dismiss();
+        }
+        super.onDestroy();
     }
 
     private HashMap<String, List<Student>> groupDataIntoHashMap(List<Student> studentList) {
@@ -177,7 +174,7 @@ public class Lab3Activity extends AppCompatActivity {
         Button newGroupBtn = dialogView.findViewById(R.id.new_group_btn);
 
         dialogBuilder.setView(dialogView);
-        AlertDialog dialog = dialogBuilder.create();
+        dialog = dialogBuilder.create();
 
         newGroupBtn.setOnClickListener(v -> {
             Group group = new Group(groupTitle.getText().toString());
