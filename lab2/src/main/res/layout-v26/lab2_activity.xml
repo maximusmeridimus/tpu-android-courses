@@ -35,22 +35,6 @@
             android:text="@string/lab2_btn_add_view"
             />
 
-        <Button
-            android:id="@+id/btn_save"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/lab2_save"
-            />
-
-        <Button
-            android:id="@+id/btn_load"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/lab2_load"
-            />
-
     </LinearLayout>
 
 

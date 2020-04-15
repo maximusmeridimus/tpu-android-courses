@@ -43,7 +43,6 @@ import static android.content.Context.MODE_PRIVATE;
 public class Lab2ViewsContainer extends LinearLayout {
 
     private int minViewsCount;
-    private int viewsCount;
     private ArrayList<Characteristics> characteristics = new ArrayList<Characteristics>();
     private int currentMaximumId = 0;
 
@@ -81,8 +80,6 @@ public class Lab2ViewsContainer extends LinearLayout {
 
         // Полученный TypedArray необходимо обязательно очистить.
         a.recycle();
-
-        setViewsCount(minViewsCount);
     }
 
     public void incrementViews(CharSequence optionTextSequence, CharSequence scoreTextSequence) {
@@ -146,23 +143,6 @@ public class Lab2ViewsContainer extends LinearLayout {
         addView(layout);
     }
 
-    public void setViewsCount(int viewsCount) {
-        if (this.viewsCount == viewsCount) {
-            return;
-        }
-        viewsCount = viewsCount < minViewsCount ? minViewsCount : viewsCount;
-
-        removeAllViews();
-        this.viewsCount = 0;
-        for (int i = 0; i < viewsCount; i++) {
-            //incrementViews();
-        }
-    }
-
-    public int getViewsCount() {
-        return viewsCount;
-    }
-
     /**
      * Метод трансформирует указанные dp в пиксели, используя density экрана.
      */
@@ -175,19 +155,7 @@ public class Lab2ViewsContainer extends LinearLayout {
         return (int) Math.ceil(density * dp);
     }
 
-    /**
-     * Метод трансформирует указанные dp в пиксели, используя density экрана.
-     */
-    @Px
-    public int pxToDp(float px) {
-        if (px == 0) {
-            return 0;
-        }
-        float density = getResources().getDisplayMetrics().density;
-        return (int) Math.ceil(px / density);
-    }
-
-    private void revalidate(){
+    public void revalidate(){
         currentMaximumId = 0;
         for(Characteristics chars : characteristics) {
             if(chars.Score > characteristics.get(currentMaximumId).Score){
@@ -204,24 +172,11 @@ public class Lab2ViewsContainer extends LinearLayout {
         }
     }
 
-    public void saveState(SharedPreferences sharedPreferences) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(characteristics);
-        editor.putString("chars", json);
-        editor.apply();
+    public ArrayList<Characteristics> getCharacteristicsList() {
+        return characteristics;
     }
 
-    public void loadState(SharedPreferences sharedPreferences) {
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("chars", null);
-        Type type = new TypeToken<ArrayList<Characteristics>>() {}.getType();
-        characteristics = gson.fromJson(json, type);
-
-        if(characteristics == null) {
-            characteristics = new ArrayList<Characteristics>();
-        }
-
-        revalidate();
+    public void setCharacteristics(ArrayList<Characteristics> chars) {
+        this.characteristics = chars;
     }
 }

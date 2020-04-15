@@ -1,7 +1,7 @@
 <resources>
     <string name="lab2_title">I\'m %s!</string>
 
-    <string name="lab2_btn_add_view">Press me!</string>
+    <string name="lab2_btn_add_view">New characteristic</string>
     <string name="lab2_load">Load</string>
     <string name="lab2_save">Save</string>
 </resources>

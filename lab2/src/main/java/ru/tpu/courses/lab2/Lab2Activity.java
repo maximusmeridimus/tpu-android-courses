@@ -50,22 +50,14 @@ import java.util.ArrayList;
 public class Lab2Activity extends AppCompatActivity {
 
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        lab2ViewsContainer.saveState(getSharedPreferences("shared preferences", MODE_PRIVATE));
-        super.onSaveInstanceState(outState, outPersistentState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        lab2ViewsContainer.loadState(getSharedPreferences("shared preferences", MODE_PRIVATE));
-        super.onRestoreInstanceState(savedInstanceState);
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList("chars", lab2ViewsContainer.getCharacteristicsList());
+        super.onSaveInstanceState(outState);
     }
 
     public static Intent newIntent(@NonNull Context context) {
         return new Intent(context, Lab2Activity.class);
     }
-
-    private static final String STATE_VIEWS_COUNT = "views_count";
 
     private Lab2ViewsContainer lab2ViewsContainer;
 
@@ -83,30 +75,10 @@ public class Lab2Activity extends AppCompatActivity {
                         ((EditText)findViewById(R.id.textOption)).getText(),
                         ((EditText)findViewById(R.id.textScore)).getText()));
 
-        findViewById(R.id.btn_save).setOnClickListener(view ->
-                lab2ViewsContainer.saveState(getSharedPreferences("shared preferences", MODE_PRIVATE)));
-
-        findViewById(R.id.btn_load).setOnClickListener(view ->
-                lab2ViewsContainer.loadState(getSharedPreferences("shared preferences", MODE_PRIVATE)));
-
         // Восстанавливаем состояние нашего View, добавляя заново все View
-        if (savedInstanceState != null) {
-            lab2ViewsContainer.setViewsCount(savedInstanceState.getInt(STATE_VIEWS_COUNT));
+        if (savedInstanceState != null ) {
+            lab2ViewsContainer.setCharacteristics(savedInstanceState.getParcelableArrayList("chars"));
+            lab2ViewsContainer.revalidate();
         }
-    }
-
-    @Px
-    public int dpToPx(float dp) {
-        if (dp == 0) {
-            return 0;
-        }
-        float density = getResources().getDisplayMetrics().density;
-        return (int) Math.ceil(density * dp);
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(STATE_VIEWS_COUNT, lab2ViewsContainer.getViewsCount());
     }
 }
