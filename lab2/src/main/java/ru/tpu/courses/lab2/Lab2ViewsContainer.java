@@ -1,9 +1,7 @@
 package ru.tpu.courses.lab2;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.TypedArray;
-import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -11,26 +9,13 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Chronometer;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.Px;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import org.w3c.dom.Text;
-
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
-
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Простейший пример самописного View. В данном случае мы просто наследуемся от LinearLayout-а и
