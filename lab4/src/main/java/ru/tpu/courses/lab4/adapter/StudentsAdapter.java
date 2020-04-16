@@ -1,5 +1,6 @@
 package ru.tpu.courses.lab4.adapter;
 
+import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.view.View;
@@ -15,17 +16,34 @@ import ru.tpu.courses.lab4.db.Student;
 
 public class StudentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    public static final int TYPE_NUMBER = 0;
+    public static final int TYPE_GROUP = 0;
     public static final int TYPE_STUDENT = 1;
 
     private List<Student> students = new ArrayList<>();
+    private OnItemClickListener mListener;
+
+    private List<ListItem> consolidatedList = new ArrayList<>();
+    private Context mContext;
+
+    public StudentsAdapter(Context context, List<ListItem> consolidatedList){
+        this.consolidatedList = consolidatedList;
+        this.mContext = context;
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        mListener = listener;
+    }
 
     @Override
     @NonNull
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
-            case TYPE_NUMBER:
-                return new NumberHolder(parent);
+            case TYPE_GROUP:
+                return new GroupHolder(parent);
             case TYPE_STUDENT:
                 return new StudentHolder(parent);
         }
@@ -35,16 +53,17 @@ public class StudentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         switch (getItemViewType(position)) {
-            case TYPE_NUMBER:
-                NumberHolder numberHolder = (NumberHolder) holder;
-                numberHolder.bind((position + 1) / 2);
+            case TYPE_GROUP:
+                GroupItem groupItem = (GroupItem) consolidatedList.get(position);
+                GroupHolder groupHolder = (GroupHolder) holder;
+                groupHolder.groupTitle.setText(groupItem.getGroup().groupName);
                 break;
-            case TYPE_STUDENT:
-                StudentHolder studentHolder = (StudentHolder) holder;
-                Student student = students.get(position / 2);
 
-                studentHolder.student.setText(student.lastName + " " + student.firstName
-                        + " " + student.secondName);
+            case TYPE_STUDENT:
+                StudentItem studentItem = (StudentItem) consolidatedList.get(position);
+                StudentHolder studentHolder = (StudentHolder) holder;
+                studentHolder.student.setText(studentItem.getStudent().toString());
+                Student student = studentItem.getStudent();
 
                 if (!TextUtils.isEmpty(student.photoPath)) {
                     studentHolder.photo.setVisibility(View.VISIBLE);
@@ -59,15 +78,30 @@ public class StudentsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public int getItemCount() {
-        return students.size() * 2;
+        return consolidatedList != null ? consolidatedList.size() : 0;
     }
 
     @Override
     public int getItemViewType(int position) {
-        return position % 2 == 0 ? TYPE_NUMBER : TYPE_STUDENT;
+        return consolidatedList.get(position).getType();
     }
 
     public void setStudents(List<Student> students) {
         this.students = students;
+    }
+
+    public void setStudentConsolidatedList(List<ListItem> consolidatedList) {
+        this.consolidatedList = consolidatedList;
+    }
+
+    public int getGroupItemPosition(int groupId){
+
+        for (int i = 0; i < consolidatedList.size(); i++) {
+            ListItem listItem = consolidatedList.get(i);
+            if(listItem.getClass() == GroupItem.class && ((GroupItem) listItem).getGroup().id == groupId) {
+                return i;
+            }
+        }
+        return 0;
     }
 }

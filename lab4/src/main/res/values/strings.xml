@@ -10,5 +10,8 @@
 
 
     <string name="lab4_error_empty_fields">All fields must not be empty</string>
+    <string name="lab4_error_group_not_set">Please, select a group</string>
     <string name="lab4_error_already_exists">The student already exists</string>
+    <string name="lab4_error_group_already_exists">The group already exists</string>
+    <string name="lab4_group">Group</string>
 </resources>

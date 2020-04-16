@@ -12,6 +12,7 @@ public class TempStudentPref {
     private static final String PREF_SECOND_NAME = "second_name";
     private static final String PREF_LAST_NAME = "last_name";
     private static final String PREF_PHOTO_PATH = "photo_path";
+    private static final String PREF_GROUP_ID = "group_id";
 
     private final SharedPreferences prefs;
 
@@ -39,13 +40,18 @@ public class TempStudentPref {
         return prefs.getString(PREF_PHOTO_PATH, null);
     }
 
+    @Nullable
+    public int getGroupId() { return prefs.getInt(PREF_GROUP_ID, 0); }
+
     public void set(
+            @Nullable int groupId,
             @Nullable String firstName,
             @Nullable String secondName,
             @Nullable String lastName,
             @Nullable String photoPath
     ) {
         prefs.edit()
+                .putInt(PREF_GROUP_ID, groupId)
                 .putString(PREF_FIRST_NAME, firstName)
                 .putString(PREF_SECOND_NAME, secondName)
                 .putString(PREF_LAST_NAME, lastName)

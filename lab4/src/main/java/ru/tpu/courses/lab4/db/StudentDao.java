@@ -24,9 +24,13 @@ public interface StudentDao {
 
     @Query(
             "SELECT COUNT(*) FROM student WHERE " +
+                    "group_id = :groupId AND " +
                     "first_name = :firstName AND " +
                     "second_name = :secondName AND " +
                     "last_name = :lastName"
     )
-    int count(@NonNull String firstName, @NonNull String secondName, @NonNull String lastName);
+    int count(@NonNull int groupId, @NonNull String firstName, @NonNull String secondName, @NonNull String lastName);
+
+    @Query("SELECT count(*) FROM student WHERE group_id = :groupId")
+    int studentCount(int groupId);
 }

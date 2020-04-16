@@ -9,5 +9,9 @@
     <string name="lab4_action_save">Сохранить</string>
 
     <string name="lab4_error_empty_fields">Все поля должны быть заполнены</string>
+    <string name="lab4_error_group_not_set">Выберите группу</string>
     <string name="lab4_error_already_exists">Такой студент уже существует</string>
+    <string name="lab4_error_group_already_exists">Такая группа уже существует</string>
+    <string name="lab4_group">Группа</string>
+
 </resources>

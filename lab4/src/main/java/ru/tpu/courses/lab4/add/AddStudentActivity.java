@@ -9,8 +9,10 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,9 +21,12 @@ import androidx.core.content.FileProvider;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 import ru.tpu.courses.lab4.Const;
 import ru.tpu.courses.lab4.R;
+import ru.tpu.courses.lab4.db.Group;
+import ru.tpu.courses.lab4.db.GroupDao;
 import ru.tpu.courses.lab4.db.Lab4Database;
 import ru.tpu.courses.lab4.db.Student;
 import ru.tpu.courses.lab4.db.StudentDao;
@@ -48,6 +53,7 @@ public class AddStudentActivity extends AppCompatActivity {
     }
 
     private StudentDao studentDao;
+    private GroupDao groupDao;
 
     private TempStudentPref studentPref;
     private BitmapProcessor bitmapProcessor;
@@ -56,6 +62,7 @@ public class AddStudentActivity extends AppCompatActivity {
     private EditText secondName;
     private EditText lastName;
     private ImageView photo;
+    private Spinner groupSelector;
 
     private String photoPath;
 
@@ -69,7 +76,7 @@ public class AddStudentActivity extends AppCompatActivity {
         studentPref = new TempStudentPref(this);
         bitmapProcessor = new BitmapProcessor(this);
         studentDao = Lab4Database.getInstance(this).studentDao();
-
+        groupDao = Lab4Database.getInstance(this).groupDao();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -77,6 +84,11 @@ public class AddStudentActivity extends AppCompatActivity {
         secondName = findViewById(R.id.second_name);
         lastName = findViewById(R.id.last_name);
         photo = findViewById(R.id.photo);
+        groupSelector = findViewById(R.id.group_selector);
+
+        ArrayAdapter<Group> groupAdapter = new ArrayAdapter<>
+                (this, android.R.layout.simple_spinner_item, groupDao.getAll());
+        groupSelector.setAdapter(groupAdapter);
 
         firstName.setText(studentPref.getFirstName());
         secondName.setText(studentPref.getSecondName());
@@ -85,13 +97,24 @@ public class AddStudentActivity extends AppCompatActivity {
         if (photoPath != null) {
             photo.setImageURI(Uri.parse(photoPath));
         }
+
+        Optional<Group> groupOptional = groupDao.getAll()
+                .stream()
+                .filter(x -> x.id == studentPref.getGroupId())
+                .findFirst();
+
+        groupOptional.ifPresent(group ->
+                groupSelector.setSelection(groupDao.getAll().indexOf(group)));
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         if (!skipSaveToPrefs) {
+            int groupId = ((Group)groupSelector.getSelectedItem()).id;
             studentPref.set(
+                    groupId,
                     firstName.getText().toString(),
                     secondName.getText().toString(),
                     lastName.getText().toString(),
@@ -173,7 +196,15 @@ public class AddStudentActivity extends AppCompatActivity {
     }
 
     private void saveStudent() {
+        int groupId = ((Group)groupSelector.getSelectedItem()).id;
+
+        if(!groupExists(groupId)) {
+            Toast.makeText(this, R.string.lab4_error_empty_fields, Toast.LENGTH_LONG).show();
+            return;
+        }
+
         Student student = new Student(
+                groupId,
                 firstName.getText().toString(),
                 secondName.getText().toString(),
                 lastName.getText().toString(),
@@ -189,7 +220,7 @@ public class AddStudentActivity extends AppCompatActivity {
             return;
         }
 
-        if (studentDao.count(student.firstName, student.secondName, student.lastName) > 0) {
+        if (studentDao.count(groupId, student.firstName, student.secondName, student.lastName) > 0) {
             Toast.makeText(
                     this,
                     R.string.lab4_error_already_exists,
@@ -206,5 +237,9 @@ public class AddStudentActivity extends AppCompatActivity {
         data.putExtra(EXTRA_STUDENT, student);
         setResult(RESULT_OK, data);
         finish();
+    }
+
+    private boolean groupExists(int groupId) {
+        return groupDao.count(groupId) == 1;
     }
 }

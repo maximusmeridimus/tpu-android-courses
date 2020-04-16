@@ -18,5 +18,16 @@
         android:layout_margin="16dp"
         android:src="@drawable/lab4_ic_add_white_24dp"
         />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="88dp"
+        android:src="@drawable/lab4_ic_add_white_24dp" />
 </FrameLayout>
 
